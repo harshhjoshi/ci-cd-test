@@ -1,0 +1,79 @@
+# The on key is used to define when
+name: H1
+
+# the CI should be triggered, aka Event
+on:
+  # When someone push or merge a pull request
+  # inside the main branch
+  push:
+    branches:
+      - main
+  # When someone create a pull request from
+  # the main branch
+  pull_request:
+    branches:
+      - main
+
+# A job is a set of steps that execute on the same runner.
+# The jobs can be run in parallel or sequentially and can
+# have many steps.
+# In this case, I created a single job with many steps
+# since the configuration is pretty simple but
+# I could have created a different structure using parallel jobs.
+# Each job uses an own runner.
+jobs:
+  # Job name
+  ha-jobstart:
+    # OS of the runner
+    runs-on: mac-latest
+
+    # A step is an individual task that can run commands in a job
+    # and share the same runner.
+    # Each step can run a ready-to-use action or a bash command
+    steps:
+      # Runner meaningful name
+      - name: Checkout
+        # Ready-to-use action made by GH or third party
+        # companies
+        # We can recognize the GH actions from the third party
+        # ones checking the name prefix.
+        # `actions/` = GH
+        # `something-else/` = third party
+        uses: actions/checkout@v2
+
+      - name: Setup React Ts
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: 12
+
+      - name: Install server dependencies
+        run: npm install
+
+      - name: Generate build
+        run: npm run build
+
+      - uses: bahmutov/npm-install@HEAD
+
+      - run: npm ci
+
+      - name: Run ESLint
+        # Run the lint custom NPM command that triggers the
+        # ESLint linter check
+        run: npm run lint
+
+      - name: Run Prettier
+        # Run the format:check custom NPM command
+        # that runs prettier to check code format
+        uses: creyD/prettier_action@v4.2
+        with:
+          # This part is also where you can pass other options, for example:
+          prettier_options: --write **/*.{js,md}
+          only_changed: True
+
+      - uses: actions/checkout@v1
+
+      - name: Share artifact inside workflow
+        uses: actions/upload-artifact@v1
+        with:
+          name: react-github-actions-build
+          path: build

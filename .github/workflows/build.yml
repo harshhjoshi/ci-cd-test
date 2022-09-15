@@ -1,5 +1,5 @@
 # The on key is used to define when
-name: Build
+name: build
 
 # the CI should be triggered, aka Event
 on:

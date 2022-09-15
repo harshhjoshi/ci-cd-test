@@ -23,7 +23,7 @@ on:
 # Each job uses an own runner.
 jobs:
   # Job name
-  ha:
+  suite:
     # OS of the runner
     runs-on: mac-latest
 
